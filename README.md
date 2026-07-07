@@ -13,7 +13,7 @@ A real-time chat application built with Node.js, offering dynamic messaging capa
 
 1. **Clone the repository**:
    ```bash
-   git clone git@github.com:shindesantosh30/Chat-Messenger.git
+   git clone git@github.com:santosh-d-shinde/Chat-Messenger.git
 
 2. **Navigate to the project directory**:
    ```bash
