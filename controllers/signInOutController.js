@@ -1,0 +1,89 @@
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const { hash, compare } = require('bcrypt');
+
+const { responseBadRequest } = require('../utillity/api_response');
+const User = require('../models/users')
+const { UserSettings } = require('../models/userSettings');
+const Role = require('../models/roles');
+
+
+class RegistrationController {
+
+    static async register(request, response) {
+        try {
+            const { user } = request.body;
+            const { email, mobile, password, firstName, lastName, confirm_password } = user;
+
+            if (!firstName || !lastName) {
+                return response.status(400).json(responseBadRequest("First and last name is required"));
+            }
+
+            if (!password) {
+                return response.status(400).json(responseBadRequest("Password is required"));
+            }
+
+            if (password !== confirm_password) {
+                return response.status(400).json(responseBadRequest("Password and confirm password must be same"));
+            }
+
+            if (await User.findOne({ where: { email } })) {
+                return response.status(400).json({ message: 'User already exists with this email' });
+            }
+
+            const hashedPassword = await hash(password, 10);
+
+            const role = await Role.findByPk(2);
+            if (!role) {
+                return response.status(404).json({ message: 'User role not found' });
+            }
+            const newUser = await User.create({
+                email, mobile, password: hashedPassword, firstName, lastName, roleId: role.id
+            });
+            
+            UserSettings.create({ userId: newUser.id });
+
+            response.status(201).json({ status_code: 201, message: "Registration successfully" });
+        } catch (error) {
+            console.error('Exception ', error);
+            response.status(500).json({ message: 'Internal server error' });
+        }
+    }
+}
+
+class LoginController {
+    static async login(request, response) {
+        try {
+            const { email, password } = request.body;
+
+            if (!email) {
+                return response.status(400).json({ "message": "Email is required" })
+            }
+            if (!password) {
+                return response.status(400).json({ "message": "Password is required" })
+            }
+            const user = await User.findOne({ where: { email } });
+            if (!user) {
+                return response.status(400).json({ message: 'User does not exests' });
+            }
+            if (user && !user.isVerified) {
+                return response.status(400).json({ success: false, message: 'Please verify your account.' });
+            }
+
+            const isPasswordValid = await compare(password, user.password);
+            if (!isPasswordValid) {
+                return response.status(400).json({ message: 'The password you entered is incorrect. Please try again.' });
+            }
+            // Generate JWT token
+            const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '8h' });
+
+            response.status(200).json({ "status_code": 200, token, user: { id: user.id, email: user.email, name: `${user.firstName} ${user.lastName}` } });
+
+        } catch (error) {
+            console.error('Error logging in:', error);
+            response.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+}
+
+module.exports = { RegistrationController, LoginController };

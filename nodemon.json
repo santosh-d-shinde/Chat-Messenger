@@ -2,6 +2,7 @@
     "watch": [
         "."
     ],
+    "delay": "500",
     "ext": "js,json",
     "ignore": [
         "*.test.js",
