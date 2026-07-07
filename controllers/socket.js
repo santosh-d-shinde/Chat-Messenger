@@ -1,10 +1,22 @@
 const socketIo = require('socket.io');
-const { authenticateSocket, handleConnection, handlePrivateMessage, handleTyping, handleStopTyping, handleDeleteMessage, handleModifyMessage, handleDisconnect } = require('../utillity/socketHandlers');
+const {
+    authenticateSocket,
+    handleConnection,
+    handlePrivateMessage,
+    handleGroupMessage,
+    handleJoinGroup,
+    handleLeaveGroup,
+    handleTyping,
+    handleStopTyping,
+    handleDeleteMessage,
+    handleModifyMessage,
+    handleDisconnect
+} = require('../utillity/socketHandlers');
 
 const socketService = (server) => {
     const io = socketIo(server, {
         cors: {
-            origin: "http://localhost:4200",
+            origin: "*",
             methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
         }
     });

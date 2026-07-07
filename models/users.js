@@ -60,7 +60,20 @@ const User = sequelize.define('User', {
   lastSeen: {
     type: DataTypes.DATE,
     allowNull: true
-  }
+  },
+  hashToken: {
+    type: DataTypes.STRING(128),
+    allowNull: true,
+  },
+  hashTokenExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+isVerified: {
+  type: DataTypes.BOOLEAN,
+  allowNull: true,
+  defaultValue: false
+},
 }, {
   tableName: 'Users',
   timestamps: true

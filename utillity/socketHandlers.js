@@ -58,6 +58,33 @@ const handlePrivateMessage = async (socket, io, messageData) => {
     }
 };
 
+// Handle sending a message to a group
+const handleGroupMessage = async (socket, io, messageData) => {
+    try {
+        const { groupId, senderId, message, attachmentId } = messageData;
+        const groupMessageInstance = await createGroupMessage({ groupId, senderId, message, attachmentId });
+        
+        // Emit message to all users in the group room
+        io.to(`group_${groupId}`).emit('group message', groupMessageInstance);
+    } catch (error) {
+        console.error('Error sending group message:', error);
+        socket.emit('error', { message: 'Failed to send group message' });
+    }
+};
+
+// Handle user joining a group
+const handleJoinGroup = (socket, groupId) => {
+    socket.join(`group_${groupId}`);
+    console.log(`User ${socket.user?.id} joined group ${groupId}`);
+};
+
+// Handle user leaving a group
+const handleLeaveGroup = (socket, groupId) => {
+    socket.leave(`group_${groupId}`);
+    console.log(`User ${socket.user?.id} left group ${groupId}`);
+};
+
+
 const handleTyping = async (io, data) => {
     const socketId = await getSocketID(data.recieverId);
     if (socketId) {
@@ -117,9 +144,12 @@ module.exports = {
     authenticateSocket,
     handleConnection,
     handlePrivateMessage,
+    handleGroupMessage,
+    handleJoinGroup,
+    handleLeaveGroup,
     handleTyping,
     handleStopTyping,
     handleDeleteMessage,
     handleModifyMessage,
     handleDisconnect
-}
+};

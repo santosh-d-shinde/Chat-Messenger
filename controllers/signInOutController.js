@@ -40,6 +40,7 @@ class RegistrationController {
             const newUser = await User.create({
                 email, mobile, password: hashedPassword, firstName, lastName, roleId: role.id
             });
+            
             UserSettings.create({ userId: newUser.id });
 
             response.status(201).json({ status_code: 201, message: "Registration successfully" });
@@ -63,8 +64,12 @@ class LoginController {
             }
             const user = await User.findOne({ where: { email } });
             if (!user) {
-                return response.status(400).json({ message: 'User with this email is not registered' });
+                return response.status(400).json({ message: 'User does not exests' });
             }
+            if (user && !user.isVerified) {
+                return response.status(400).json({ success: false, message: 'Please verify your account.' });
+            }
+
             const isPasswordValid = await compare(password, user.password);
             if (!isPasswordValid) {
                 return response.status(400).json({ message: 'The password you entered is incorrect. Please try again.' });

@@ -22,10 +22,10 @@ router.get('/auth/google/callback', passport.authenticate('google', {
 
 // Lazy-loaded routes (require/import when the route is accessed)
 // Public routes (no authentication required)
-router.use('/api/logout', async (req, res, next) => {
-  const loginRoutes = require('./loginRouter');
-  loginRoutes(req, res, next);
-});
+// router.use('/api/logout', async (req, res, next) => {
+//   const loginRoutes = require('./loginRouter');
+//   loginRoutes(req, res, next);
+// });
 
 router.use('/auth/login', async (req, res, next) => {
   const loginRoutes = require('./loginRouter');
@@ -46,6 +46,18 @@ router.use('/auth/reset-password', async (req, res, next) => {
   const resetPassword = require('./reset_password');
   resetPassword(req, res, next);
 });
+
+
+router.use('/email/verify', async (req, res, next) => {
+  const emailVerify = require('./emailVerify');
+  emailVerify(req, res, next);
+});
+
+/* 
+ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ @@@@@@@@@@@@@@@@@@@ Authenticated routes @@@@@@@@@@@@@@@@@@@@@
+ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
 
 router.use('/auth/change-password', authGuard, async (req, res, next) => {
   const changePassword = require('./changePassword');
